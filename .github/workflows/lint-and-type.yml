@@ -20,8 +20,13 @@ jobs:
               with:
                   python-version: "3.14"
 
-            - name: Install dev tools
-              run: python -m pip install --upgrade pip && pip install ruff ty
+            - name: Install dependencies and dev tools
+              run: |
+                  python -m pip install --upgrade pip
+                  # install runtime dependencies from pyproject.toml so `ty` can resolve imports
+                  pip install .
+                  # install linters/type-checkers
+                  pip install ruff ty
 
             - name: Run ruff (lint)
               run: ruff check .

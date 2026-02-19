@@ -8,13 +8,16 @@ class OdooClient:
 
     def __init__(self):
         self.common = ServerProxy(f"{settings.URL}/xmlrpc/2/common")
-        self.models = ServerProxy(f"{settings.URL}/xmlrpc/2/object")
+        self._models_url = f"{settings.URL}/xmlrpc/2/object"
         self.uid = self.common.authenticate(
             settings.DATABASE, settings.USER, settings.API_KEY, {}
         )
 
     def execute(self, model, method, *args, **kwargs):
-        return self.models.execute_kw(
+        # Create a fresh ServerProxy per call to avoid shared-connection
+        # race conditions when concurrent requests hit the same instance.
+        models = ServerProxy(self._models_url)
+        return models.execute_kw(
             settings.DATABASE,
             self.uid,
             settings.API_KEY,
